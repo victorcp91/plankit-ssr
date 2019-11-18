@@ -5,7 +5,7 @@ const initialState = [];
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_PLANTS: {
-      const currentPlants = state.plants;
+      const currentPlants = state;
       if(action.plants && action.plants.length) {
         action.plants.forEach(plant => {
           const index = currentPlants.findIndex(el => el.id === plant.id);

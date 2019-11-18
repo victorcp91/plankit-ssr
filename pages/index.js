@@ -7,10 +7,13 @@ import MainSlider from '../components/MainSlider';
 import PresentationArea from '../components/PresentationArea';
 import Search from '../components/Search';
 import Filters from '../components/Filters';
+import Channels from '../components/Channels';
+import { comparableString } from '../libs/Utils';
 
-import { useSelector } from 'react-redux';
+import * as actionTypes from '../store/actions';
+import { useSelector, useDispatch } from 'react-redux';
 
-const Home = ({ initialFeaturedPosts }) => {
+const Home = ({ initialFeaturedPosts, channels }) => {
 
   const [filteredPlants, setFilteredPlants] = useState(null);
   const [hideFilters, setHideFilters] = useState(null);
@@ -22,7 +25,8 @@ const Home = ({ initialFeaturedPosts }) => {
   const [sortMethod, setSortMethod] = useState('');
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [activeSection, setActiveSection] = useState('channels');
-
+  
+  const dispatch = useDispatch();
 
   // useEffect(() => {
   //   setLoadingChannels(true);
@@ -46,8 +50,14 @@ const Home = ({ initialFeaturedPosts }) => {
 
   useEffect(() => {
     setFeaturedPosts(initialFeaturedPosts);
+    if(channels.length){
+      console.log(channels);
+      dispatch({ type: actionTypes.SET_CHANNELS, channels});
+    }
   }, []);
 
+  const currentChannels = useSelector(state =>  state.channels);
+  
   // useEffect(() => {
   //   let filterTimer = setTimeout(()=> {
   //     if(searchTerm){
@@ -95,6 +105,155 @@ const Home = ({ initialFeaturedPosts }) => {
     }
   }
 
+  const setCurrentSearchTerm = term => {
+    setSearchTerm(term);
+  }
+
+  const filterChannels = () => {
+
+    const tags = (names, key) => {
+      let contains = false;
+      names.forEach(tag => {
+        if(comparableString(tag).includes(key)){
+          contains = true;
+        }
+      });
+      return contains;
+    }
+
+    let filteredChannels = currentChannels;
+    if (searchTerm) {
+      let keywords = searchTerm;
+      const finalKeywords = comparableString(keywords).split(' '); 
+      finalKeywords.forEach(key => {
+        filteredChannels = filteredChannels.filter(channel => (comparableString(channel.name).includes(key) ||
+        tags(channel.tags, key)));
+      });
+    }
+    if(filteredChannels) {
+
+      switch(sortMethod){
+        case 'ascending':
+          filteredChannels = filteredChannels.sort((a,b) => {
+            if ( a.name < b.name ){
+              return -1;
+            }
+            if ( a.name > b.name ){
+              return 1;
+            }
+            return 0;
+          });
+          break;
+        case 'descending':
+          filteredChannels = filteredChannels.sort((a,b) => {
+            if ( a.name < b.name ){
+              return 1;
+            }
+            if ( a.name > b.name ){
+              return -1;
+            }
+            return 0;
+          });
+          break;
+        case 'byDate':
+          break;
+        default:
+          break;
+      }
+
+      return filteredChannels;
+    } return false;
+    
+  }
+
+  const filterPosts = () => {
+    let filteredPosts = foundPosts;
+    if (searchTerm) {
+      let keywords = searchTerm;
+      const finalKeywords = comparableString(keywords).split(' '); 
+      finalKeywords.forEach(key => {
+        filteredPosts = filteredPosts.filter(post => (comparableString(post.title).includes(key) ||
+        comparableString(post.description).includes(key)));
+      });
+    }
+    if(filteredPosts) {
+      switch(sortMethod){
+        case 'ascending':
+          filteredPosts = filteredPosts.sort((a,b) => {
+            if ( a.title < b.title ){
+              return -1;
+            }
+            if ( a.title > b.title ){
+              return 1;
+            }
+            return 0;
+          });
+          break;
+        case 'descending':
+          filteredPosts = filteredPosts.sort((a,b) => {
+            if ( a.title < b.title ){
+              return 1;
+            }
+            if ( a.title > b.title ){
+              return -1;
+            }
+            return 0;
+          });
+          break;
+        case 'byDate':
+          filteredPosts = filteredPosts.sort((a,b) => moment(b.createdAt).format('YYYYMMDD') - moment(a.createdAt).format('YYYYMMDD'));
+          break;
+        default:
+          filteredPosts = filteredPosts.sort((a,b) => moment(b.createdAt).format('YYYYMMDD') - moment(a.createdAt).format('YYYYMMDD'));
+          break;
+      }
+      return filteredPosts;
+    } return [];
+  }
+
+  const orderedPosts = () => {
+    let posts = featuredPosts;
+    switch(sortMethod){
+      case 'ascending':
+        posts = posts.sort((a,b) => {
+          if ( a.title < b.title ){
+            return -1;
+          }
+          if ( a.title > b.title ){
+            return 1;
+          }
+          return 0;
+        });
+        break;
+      case 'descending':
+        posts = posts.sort((a,b) => {
+          if ( a.title < b.title ){
+            return 1;
+          }
+          if ( a.title > b.title ){
+            return -1;
+          }
+          return 0;
+        });
+        break;
+      case 'byDate':
+        posts = posts.sort((a,b) => moment(b.createdAt).format('YYYYMMDD') - moment(a.createdAt).format('YYYYMMDD'));
+        break;
+      default:
+        posts = posts.sort((a,b) => {
+          if ( a.populartitlePtBr < b.populartitlePtBr ){
+            return 1;
+          }
+          if ( a.populartitlePtBr > b.populartitlePtBr ){
+            return -1;
+          }
+          return 0;
+        });
+        break;
+    }
+    return posts;
+  }
+
   return(
   <div>
     <Head>
@@ -120,8 +279,26 @@ const Home = ({ initialFeaturedPosts }) => {
         />
         <button>Plantas</button>
       </div>
-      <Search/>
-      <Filters/>
+      <Search
+        searchTerm={setCurrentSearchTerm}
+        // order={setResultSort}
+        placeholder={activeSection === 'channels' ? 'Buscar canal' : 'Buscar planta'}
+        activeSection={activeSection}/>
+      {activeSection === 'channels' ? 
+        <div className="channelResults">
+          {searchTerm && 
+            <Channels
+              channels={filterChannels()}
+            />}
+          {/* {searchTerm && foundPosts && 
+            <Posts posts={filterPosts()}/>} */}
+          <h2 className="lastPosts">Últimas postagens:</h2>
+          {/* <Posts posts={orderedPosts()}/> */}
+        </div>
+        :<>
+          <Filters/>
+        </>
+      }
     </div>
     
     <style jsx>{`
@@ -159,10 +336,16 @@ export default Home
 
 Home.getInitialProps = async () => {
   let initialFeaturedPosts = [];
-  await Api.getFeaturedPosts().then((res) => {
+  await Api.getFeaturedPosts().then(res => {
     initialFeaturedPosts = res;
   })
-  return { initialFeaturedPosts };
+  let channels = [];
+  await Api.getChannels().then(res => {
+    channels = res;
+    console.log(res);
+  })
+  
+  return { initialFeaturedPosts, channels };
 }
 
 

@@ -8,7 +8,7 @@ const search = React.memo(props => {
 
   useEffect(() => {
     let searchTermTimer = setTimeout(()=> {
-      // props.searchTerm(searchTerm.toLocaleLowerCase());
+      props.searchTerm(searchTerm.toLocaleLowerCase());
     },1500);
     return () => {
       clearTimeout(searchTerm)
