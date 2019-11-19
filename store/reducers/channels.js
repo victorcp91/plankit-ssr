@@ -22,9 +22,9 @@ const reducer = (state = initialState, action) => {
     }
     case actionTypes.SET_CHANNEL_POSTS: {
       const currentChannels = state;
-      const channelIndex = currentChannels.findIndex(channel => channel.id === channelId);
+      const channelIndex = currentChannels.findIndex(channel => channel.id === action.channelId);
       if(channelIndex > -1){
-        currentChannels[channelIndex].posts = posts;
+        currentChannels[channelIndex].posts = action.posts;
       }
       return Object.assign([], state, currentChannels);
     }

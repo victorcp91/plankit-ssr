@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 // import { deleteUser } from '../store/user';
 
-import { Theme } from '../libs/variables';
+import Theme from '../libs/Theme';
 // import Api from '../libs/Api';
 import logoIcon from '../assets/icons/plankitIcon.svg';
 import userIcon from '../assets/icons/userIcon.svg';

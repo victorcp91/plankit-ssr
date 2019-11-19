@@ -3,6 +3,7 @@ import { Link } from 'next/link';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Theme from '../libs/Theme';
 
 
 const SampleNextArrow = props => {
@@ -23,12 +24,12 @@ const SampleNextArrow = props => {
           height: 50px;
           border-radius: 50%;
           top: 50%;
-          background-color: lightGray;
+          background-color: ${Theme.backgroundLightGray};
           box-shadow: inset 2px 1px 3px rgba(0,0,0,.3);
           cursor: pointer;
         }
         @media only screen and (min-width: 875px) { 
-          .prevArrow,.nextArrow{
+          .nextArrow{
             width: 80px;
             height: 80px;
           }
@@ -75,7 +76,7 @@ const SamplePrevArrow = props => {
         height: 50px;
         border-radius: 50%;
         top: 50%;
-        background-color: lightGray;
+        background-color: ${Theme.backgroundLightGray};
         box-shadow: inset 2px 1px 3px rgba(0,0,0,.3);
         cursor: pointer;
       }
@@ -154,7 +155,7 @@ const MainSlider = props => {
       }
       .postLink{
           text-decoration: none;
-          color: black;
+          color: ${Theme.black};
       }
       .imageContainer{
         position: relative;
@@ -174,7 +175,7 @@ const MainSlider = props => {
         z-index: 50;
         bottom: 40px;
         padding: 10px 15px 10px 30px;
-        background-color: lightGray;
+        background-color: ${Theme.lightGray};
         font-family: 'Helvetica Light';
         font-size: 18px;
       }  
@@ -185,12 +186,15 @@ const MainSlider = props => {
       }
     `}</style>
     <style global jsx>{`
+      .slick-slider{
+        overflow: hidden;
+      }
       .slick-dots.dots{
         bottom: 10px;
       }
       .slick-dots.dots button:before{
         font-size: 15px;
-        color: white;
+        color: ${Theme.white};
         opacity: 1;
       }
       .slick-dot .slick-active button:before{

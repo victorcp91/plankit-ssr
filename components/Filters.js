@@ -11,7 +11,7 @@ import wheatIcon from '../assets/icons/wheatIcon.svg';
 import warningIcon from '../assets/icons/warningIcon.svg';
 
 import filtersList from '../libs/filters.json';
-import { Theme } from '../libs/variables';
+import Theme from '../libs/Theme';
 
 const filters = props => {
   const [selectedSection, setSelectedSection] = useState(null);

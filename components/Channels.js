@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'next/link';
 import { userSelector } from 'react-redux';
+import Theme from '../libs/Theme';
 
 const channels = React.memo(props => {
 
@@ -8,9 +9,7 @@ const channels = React.memo(props => {
     e.preventDefault();
     props.unfollow(e.target.value);
   }
-
   
-
   return(
     <>
       <div className={`${props.unfollow ? 'followedChannels' : 'channels'}`}>
@@ -53,7 +52,7 @@ const channels = React.memo(props => {
           position: relative;
           width: 35vw;
           text-decoration: none;
-          color: black;
+          color: ${Theme.black};
           font-family: 'Helvetica Light';
           margin-bottom: 40px;
           overflow: hidden;
@@ -103,6 +102,13 @@ const channels = React.memo(props => {
           }
         }
         .channel .profileImage {
+          box-sizing: border-box;
+          box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.1);
+          background-color: #ebebeb;
+          border: none;
+          padding: 10px;
+          font-size: 14px;
+          white-space: pre-line;
           object-fit: cover;
           display: inline-block;
           width: 100%;
@@ -117,6 +123,13 @@ const channels = React.memo(props => {
           }
         }
         .channels .channel .delete {
+          box-sizing: border-box;
+          box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.1);
+          background-color: #ebebeb;
+          border: none;
+          padding: 10px;
+          font-size: 14px;
+          white-space: pre-line;
           position: absolute;
           right: 0px;
           top: 0px;
@@ -125,7 +138,7 @@ const channels = React.memo(props => {
           margin: 0;
           width: 40px;
           height: 40px;
-          background-color: lightGray;
+          background-color: ${Theme.lightGray};
           border-radius: 50%;
           border: none;
           cursor: pointer;
@@ -139,7 +152,7 @@ const channels = React.memo(props => {
           width: 10px;
           height: 2px;
           transform: rotate(-45deg);
-          background-color: red;
+          background-color: ${Theme.red};
         }
         .channels .channel .delete:after {
           position: absolute;
@@ -150,7 +163,7 @@ const channels = React.memo(props => {
           left: 30%;
           bottom: 40%;
           transform: rotate(45deg);
-          background-color: red;
+          background-color: ${Theme.red};
         }
         .channels .channel .name {
           margin: 5px 0;
@@ -176,7 +189,7 @@ const channels = React.memo(props => {
           position: relative;
           width: 35vw;
           text-decoration: none;
-          color: black;
+          color: ${Theme.black};
           font-family: 'Helvetica Light';
           margin-bottom: 20px;
           overflow: hidden;
@@ -211,6 +224,13 @@ const channels = React.memo(props => {
           }
         }
         .followedChannels .channel .profileImage {
+          box-sizing: border-box;
+          box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.1);
+          background-color: #ebebeb;
+          border: none;
+          padding: 10px;
+          font-size: 14px;
+          white-space: pre-line;
           object-fit: cover;
           display: inline-block;
           width: 100%;
@@ -225,6 +245,13 @@ const channels = React.memo(props => {
           }
         }
         .followedChannels .channel .delete {
+          box-sizing: border-box;
+          box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.1);
+          background-color: #ebebeb;
+          border: none;
+          padding: 10px;
+          font-size: 14px;
+          white-space: pre-line;
           position: absolute;
           right: 0px;
           top: 0px;
@@ -233,7 +260,7 @@ const channels = React.memo(props => {
           margin: 0;
           width: 40px;
           height: 40px;
-          background-color: lightGray;
+          background-color: ${Theme.lightGray};
           border-radius: 50%;
           border: none;
           cursor: pointer;
@@ -247,7 +274,7 @@ const channels = React.memo(props => {
           width: 10px;
           height: 2px;
           transform: rotate(-45deg);
-          background-color: red;
+          background-color: ${Theme.red};
         }
         .followedChannels .channel .delete:after {
           position: absolute;

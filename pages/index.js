@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Switch from "react-switch";
 import Head from 'next/head';
+import moment from 'moment';
 import Api from '../libs/Api';
 import Header from '../components/Header';
 import MainSlider from '../components/MainSlider';
@@ -8,6 +9,8 @@ import PresentationArea from '../components/PresentationArea';
 import Search from '../components/Search';
 import Filters from '../components/Filters';
 import Channels from '../components/Channels';
+import Posts from '../components/Posts';
+import Plants from '../components/Plants';
 import { comparableString } from '../libs/Utils';
 
 import * as actionTypes from '../store/actions';
@@ -57,46 +60,47 @@ const Home = ({ initialFeaturedPosts, channels }) => {
   }, []);
 
   const currentChannels = useSelector(state =>  state.channels);
+  const plants = useSelector(state =>  state.plants);
   
-  // useEffect(() => {
-  //   let filterTimer = setTimeout(()=> {
-  //     if(searchTerm){
-  //       if(activeSection === 'plants'){
-  //         setLoadingPlants(true);
-  //         Api.getFilteredPlants(findFilters, searchTerm).then(res => {
-  //           setPlants(res);
-  //           setLoadingPlants(false);
-  //         })
-  //       } else {
-  //         setLoadingChannels(true);
-  //         Api.getSearchedChannels(searchTerm).then(res => {
-  //           setChannels(res.channels);
-  //           if(res.posts && res.posts.length){
-  //             setFoundPosts(res.posts);
-  //             res.posts.forEach(post => {
-  //               setChannelPosts(post.channel, [post]);
-  //             })
-  //           }
-  //           setLoadingChannels(false);
-  //         })
-  //       }
-  //     } else {
-  //       setFoundPosts(null);
-  //     }
-  //   },1500);
-  //   return () => {
-  //     clearTimeout(filterTimer)
-  //   };
-  // }, [searchTerm]);
+  useEffect(() => {
+    let filterTimer = setTimeout(()=> {
+      if(searchTerm){
+        if(activeSection === 'plants'){
+          setLoadingPlants(true);
+          Api.getFilteredPlants(findFilters, searchTerm).then(res => {
+            dispatch({ type: actionTypes.SET_PLANTS, res});
+            setLoadingPlants(false);
+          })
+        } else {
+          setLoadingChannels(true);
+          Api.getSearchedChannels(searchTerm).then(res => {
+            dispatch({ type: actionTypes.SET_CHANNELS, channels: res.channels});
+            if(res.posts && res.posts.length){
+              setFoundPosts(res.posts);
+              res.posts.forEach(post => {
+                dispatch({ type: actionTypes.SET_CHANNEL_POSTS, postId: post.channel, posts: [post]});
+              })
+            }
+            setLoadingChannels(false);
+          })
+        }
+      } else {
+        setFoundPosts(null);
+      }
+    },1500);
+    return () => {
+      clearTimeout(filterTimer)
+    };
+  }, [searchTerm]);
 
 
   const toogleSection = () => {
     if(activeSection === 'channels'){
       setActiveSection('plants');
-      if(!props.plants.length){
+      if(!plants.length){
         setLoadingPlants(true);
         Api.getPlants().then((res) => {
-          setPlants(res);
+          dispatch({ type: actionTypes.SET_PLANTS, res});
           setLoadingPlants(false);
         });
       }
@@ -107,6 +111,10 @@ const Home = ({ initialFeaturedPosts, channels }) => {
 
   const setCurrentSearchTerm = term => {
     setSearchTerm(term);
+  }
+
+  const setResultSort = sort => {
+    setSortMethod(sort);
   }
 
   const filterChannels = () => {
@@ -254,6 +262,77 @@ const Home = ({ initialFeaturedPosts, channels }) => {
     return posts;
   }
 
+  const filterPlants = () => {
+    let filteredPlants = plants;
+
+    const otherNames = (names, key) => {
+      let contains = false;
+      names.forEach(name => {
+        if(comparableString(name).includes(key)){
+          contains = true;
+        }
+      });
+      return contains;
+    }
+
+    if (searchTerm) {
+      filteredPlants = filteredPlants
+        .filter(plant =>  compareStrings(plant.popularNamePtBr, searchTerm) ||
+        otherNames(plant.otherPopularNamesPtBr, searchTerm) ||
+        compareStrings(plant.scientificName,searchTerm));
+    }
+
+    if(findFilters && findFilters.length) {
+      findFilters.forEach(filter => {
+        filteredPlants = filteredPlants.filter(plant => plant.tags.includes(filter));
+      });
+    }
+    if(hideFilters && hideFilters.length){
+      hideFilters.forEach(filter => {
+        filteredPlants = filteredPlants.filter(f => !f.tags.includes(filter.split('hide_')[1]));
+        if(filter.split('hide_')[1] === 'dangerous'){
+          filteredPlants = filteredPlants.filter(f => !f.tags.includes('thorns') && !f.tags.includes('poisonous'));
+        }
+        if(filter.split('hide_')[1] === 'vegetable_garden'){
+          filteredPlants = filteredPlants.filter(f => !f.tags.includes('vegetable_leaves') 
+          && !f.tags.includes('vegetable')
+          && !f.tags.includes('herbs')
+          && !f.tags.includes('pancs'));
+        }
+      })
+    }
+    switch(sortMethod){
+      case 'ascending':
+        filteredPlants = filteredPlants.sort((a,b) => {
+          if ( a.popularNamePtBr < b.popularNamePtBr ){
+            return -1;
+          }
+          if ( a.popularNamePtBr > b.popularNamePtBr ){
+            return 1;
+          }
+          return 0;
+        });
+        break;
+      case 'descending':
+        filteredPlants = filteredPlants.sort((a,b) => {
+          if ( a.popularNamePtBr < b.popularNamePtBr ){
+            return 1;
+          }
+          if ( a.popularNamePtBr > b.popularNamePtBr ){
+            return -1;
+          }
+          return 0;
+        });
+        break;
+      case 'byDate':
+        filteredPlants = filteredPlants.sort();
+        break;
+      default:
+        filteredPlants = filteredPlants.sort();
+    }
+    return filteredPlants;
+  }
+
   return(
   <div>
     <Head>
@@ -281,7 +360,7 @@ const Home = ({ initialFeaturedPosts, channels }) => {
       </div>
       <Search
         searchTerm={setCurrentSearchTerm}
-        // order={setResultSort}
+        order={setResultSort}
         placeholder={activeSection === 'channels' ? 'Buscar canal' : 'Buscar planta'}
         activeSection={activeSection}/>
       {activeSection === 'channels' ? 
@@ -290,13 +369,20 @@ const Home = ({ initialFeaturedPosts, channels }) => {
             <Channels
               channels={filterChannels()}
             />}
-          {/* {searchTerm && foundPosts && 
-            <Posts posts={filterPosts()}/>} */}
+          {searchTerm && foundPosts && 
+            <Posts posts={filterPosts()}/>}
           <h2 className="lastPosts">Últimas postagens:</h2>
-          {/* <Posts posts={orderedPosts()}/> */}
+          <Posts posts={orderedPosts()}/>
         </div>
         :<>
           <Filters/>
+          <Plants
+            plants={filterPlants()}
+            // user={props.user}
+            // addGardemPlant={addToGardem}
+            // removeGardemPlant={removeFromGardem}
+            loading={loadingPlants}
+          />
         </>
       }
     </div>
